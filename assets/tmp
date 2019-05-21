@@ -1,7 +1,0 @@
-#loginform, p#nav, p#backtoblog, #login h1 {
-				display:    none !important;
-				visibility: hidden !important;
-			}
-			#copyright div.copytext a, div.footer-copyright {
-				color: #FF2848;
-			}
