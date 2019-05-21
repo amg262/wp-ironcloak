@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2019.
+ * Andrew M. Gunn  |  andrewmgunn26@gmail.com
+ * github.com/amg262  |
+ */
+
+
+#loginform, p#nav, p#backtoblog, #login h1 {
+	display:    none !important;
+	visibility: hidden !important;
+}
+
+#copyright div.copytext a, div.footer-copyright {
+	color: #FF2848;
+}

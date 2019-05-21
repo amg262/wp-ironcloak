@@ -1,0 +1,23 @@
+{
+  "name": "wp-ironcloak",
+  "version": "1.0.0",
+  "description": "wp-ironcloak",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amg262/wp-ironcloak.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amg262/wp-ironcloak/issues"
+  },
+  "homepage": "https://github.com/amg262/wp-ironcloak#readme",
+  "dependencies": {
+    "sweetalert": "^2.1.2",
+    "sweetalert2": "^8.11.1"
+  }
+}
