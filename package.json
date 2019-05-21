@@ -2,22 +2,39 @@
   "name": "wp-ironcloak",
   "version": "1.0.0",
   "description": "wp-ironcloak",
-  "main": "main.js",
+  "main": "admin.js",
+  "dependencies": {
+    "auto-load": "^3.0.4",
+    "browser-sync": "^2.26.5",
+    "del": "^4.1.1",
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-postcss": "^8.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-uglify": "^3.0.2",
+    "install": "^0.12.2",
+    "jquery": "^3.4.1",
+    "npm": "^6.9.0"
+  },
+  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test1": "echo \"Error: no test specified\" && exit 1",
+    "start": "gulp serve",
+    "build": "gulp watch",
+    "test": "gulp serve && gulp watch",
+    "prod": "NODE_ENV=production webpack --progress --colors -p --config webpack.config.js",
+    "clean": "gulp live",
+    "watch": "gulp live",
+    "purge": "gulp live",
+    "zip": "gulp live",
+    "min": "gulp live",
+    "postinstall": "gulp live"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/amg262/wp-ironcloak.git"
+    "url": "git+ssh://git@bitbucket.org/amg262/wp-ironcloak.git"
   },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/amg262/wp-ironcloak/issues"
-  },
-  "homepage": "https://github.com/amg262/wp-ironcloak#readme",
-  "dependencies": {
-    "sweetalert": "^2.1.2",
-    "sweetalert2": "^8.11.1"
-  }
+  "homepage": "https://bitbucket.org/amg262/wp-ironcloak#readme"
 }
