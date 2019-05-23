@@ -8,15 +8,15 @@
 //const babel = require("gulp-babel");
 const gulp = require('gulp');
 const concat = require('gulp-concat');
-const uglify = require('gulp-uglify');
-const imagemin = require('gulp-imagemin');
+//const uglify = require('gulp-uglify');
+//const imagemin = require('gulp-imagemin');
 const del = require('del');
 const clean = require('gulp-clean');
 const rename = require('gulp-rename');
 const browserSync = require('browser-sync').create();
-const cssnano = require('gulp-cssnano');
-const zip = require('gulp-zip');
-const unzip = require('gulp-unzip');
+//const cssnano = require('gulp-cssnano');
+//const zip = require('gulp-zip');
+//const unzip = require('gulp-unzip');
 const minimatch = require('minimatch');
 const mkdirp = require('mkdirp');
 
@@ -93,9 +93,9 @@ var dirs = {
 //	gulp.src(paths.css).pipe(cssnano()).pipe(rename({suffix: '.min'})).pipe(gulp.dest('dist/css'));
 //});
 //
-//gulp.task('scripts', function () {
-//	return gulp.src(paths.data).pipe(concat('*')).pipe(gulp.dest('archive'));
-//});
+gulp.task('scripts', function () {
+	return gulp.src(paths.data).pipe(concat('*')).pipe(gulp.dest('archive'));
+});
 //
 ///**
 // * Minify compiled JavaScript.
@@ -133,4 +133,6 @@ gulp.task('watch', function () {
 //gulp.task('clean', ['purge', 'imagemin', 'cssnano', 'uglify']);
 //gulp.task('run', ['purge', 'imagemin', 'cssnano', 'uglify', 'zip', 'scripts', 'serve', 'watch']);
 gulp.task('live', ['serve', 'watch']);
+gulp.task('serve', ['serve']);
+gulp.task('watch', ['watch']);
 
