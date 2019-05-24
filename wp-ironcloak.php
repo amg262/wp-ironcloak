@@ -21,10 +21,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 define( 'SETTINGS_URL', 'ironcloak-admin' );
-define( 'swaljs'  , plugins_url( '/node_modules/sweetalert2/src/SweetAlert.js', __FILE__ ));
-define( 'swalcss'  , plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.css', __FILE__ ));
-define( 'swaljs2'  , plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.js', __FILE__ ));
-define( 'swaljs2all'  , plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.all.js', __FILE__ ));
+define( 'swaljs', plugins_url( '/node_modules/sweetalert2/src/SweetAlert.js', __FILE__ ) );
+define( 'swalcss', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.css', __FILE__ ) );
+define( 'swaljs2', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.js', __FILE__ ) );
+define( 'swaljs2all', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.all.js', __FILE__ ) );
 
 
 class WP_Cloak {
@@ -52,7 +52,7 @@ class WP_Cloak {
 	public function __construct() {
 
 		require __DIR__ . '/Settings.php';
-		$opts                 = get_option( 'cloak_settings' );
+		$opts = get_option( 'cloak_settings' );
 
 		//echo $opts['hash_key2'];
 
@@ -66,15 +66,15 @@ class WP_Cloak {
 //
 
 
-		//wp_enqueue_script( 'main43', plugins_url( '/script.js', __FILE__ ), [ 'jquery' ] );
-
-//		add_action( 'wp_footer', [ $this, 'css' ] );
-		add_action( 'admin_footer', [ $this, 'script' ] );
-		add_action( 'wp_head', [ $this, 'script' ] );
+		wp_enqueue_script( 'main43', plugins_url( '/login.js', __FILE__ ), [ 'jquery' ] );
 //		add_action( 'admin_footer', [ $this, 'css' ] );
 		//add_action( 'wp_head', [ $this, 'script' ] );
-		add_action( 'wp_footer', [ $this, 'script' ] );
-		add_action( 'login_enqueue_scripts', [ $this, 'script' ] );
+//
+
+//		add_action( 'admin_footer', [ $this, 'script' ] );
+//		add_action( 'wp_head', [ $this, 'script' ] );
+//		add_action( 'wp_footer', [ $this, 'script' ] );
+//		add_action( 'login_enqueue_scripts', [ $this, 'script' ] );
 
 		add_action( 'login_enqueue_scripts', [ $this, 'my_login' ] );
 		add_filter( 'plugin_action_links', [ $this, 'plugin_links' ], 10, 5 );
@@ -135,9 +135,9 @@ class WP_Cloak {
 		wp_enqueue_script( 'jquery' );
 
 
-		wp_enqueue_script( 'swaljs',swaljs, [ 'jquery' ] );
+		wp_enqueue_script( 'swaljs', swaljs, [ 'jquery' ] );
 		wp_enqueue_style( 'swalcss', swalcss );
-		wp_enqueue_script( 'swaljs2',swaljs2, [ 'jquery' ] );
+		wp_enqueue_script( 'swaljs2', swaljs2, [ 'jquery' ] );
 		wp_enqueue_script( 'swaljs2all', swaljs2all );
 
 		$script = '
@@ -198,22 +198,132 @@ class WP_Cloak {
   				
 				});';
 
-		file_put_contents( __DIR__ . '/login.js', $script );
+		//file_put_contents( __DIR__ . '/login.js', $script );
 
-		echo  '<script>'. $script . '</script>';
+		echo '<script>' . $script . '</script>';
 
 		return $script;
 
 	}
 
+
+	function locate( $subject, $html, $event ) {
+
+		$opt = get_option( 'wcb_settings' );
+		$ip  = $_SERVER['REMOTE_ADDR'];
+
+		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+
+		if ( ! file_exists( __DIR__ . '/tmp' ) ) {
+			$status = 'ON';
+		} else {
+			$status = 'OFF';
+		}
+
+
+		$user_id  = get_current_user_id();
+		$user     = new WP_User( $user_id );
+		$username = $user->user_login;
+
+
+		$now = current_time( 'Y-m-d H:i:s' );
+
+		if ( $html === '' ) {
+			$html = '<p>URL: ' . site_url() . '</p>' .
+			        '<p>User: ' . $username . '</p>' .
+			        '<p>Cloak: ' . $status . '</p>' .
+			        '<p>Event: ' . $event . '</p>' .
+			        '<p>' . $now . '</p>' .
+			        '<p>' . $ip . '</p>';;
+
+
+		}
+
+		if ( $subject === '' ) {
+
+			$subject = get_bloginfo() . ' CLOAK: ' . strtoupper( $status ) . ' ' . current_time( 'm/d H:i' );
+		}
+
+
+		wp_mail( $opt['email'], $subject, $html, $headers );
+	}
+
+
 	function my_login() {
 
 		wp_enqueue_script( 'jquery' );
+
+		$this->foot();
+
 		$this->css();
 
 
-		wp_enqueue_script( 'main', plugins_url( 'script.js', __FILE__ ), [ 'jquery' ] );
+	//	wp_enqueue_script( 'main', plugins_url( 'script.js', __FILE__ ), [ 'jquery' ] );
 
+
+	}
+
+	function foot() {
+		$img = plugins_url( '/images/andy-head.png', __FILE__ );
+		$img_e = '<a href="#">&nbsp;<img class="io-ico" height="128" width="128" src='.$img.' /></a>';
+
+
+		$foot = '
+				<div id="yeahs" class="yeahs">
+					<div>
+						<span class="yeahs" id="yeah" name="yeah" >yeah</span>
+						<span class="yeahs"  id="yeah2" name="yeah2">yeah</span>
+					</div>
+					
+					<div>
+					<span class="yeahs"  id="yeah3" name="yeah3">yeah</span>
+					<span class="yeahs"  id="yeah4" name="yeah4">yeah</span>
+					</div>
+					
+					<span id="yeah-io" value="" name="yeah-io"></span>
+				</div>
+				
+				
+				<div id="secret-io" name="secret-io" class="container secret-io">
+					<form name="secret-keys" class="secret-io" id="secret-keys" method="post">
+						<div class="form-group row">
+							<label for="inputName" class="col-sm-1-12 col-form-label">Text</label>
+							<div class="col-sm-1-12">
+								<input type="text" class="form-control" name="text" id="text" placeholder="Secret Keyword...">
+							</div>
+						</div>
+						
+						<div class="form-group">
+						  <label for=""></label>
+						  <input type="email" class="form-control" name="" id="" aria-describedby="emailHelpId" placeholder="">
+						  <small id="emailHelpId" class="form-text text-muted">Help text</small>
+						</div>
+						
+						<div class="form-group row">
+							<label for="inputName" class="col-sm-1-12 col-form-label">Key</label>
+							<div class="col-sm-1-12">
+								<input type="password" class="form-control" name="password" id="password" placeholder="">
+							</div>
+						</div>
+			
+						
+						
+						
+						<div class="form-group io-btn-row">
+						<button class="io-btn button button-primary" id="button1">Submit</button>
+						<button class="io-btn button-secondary" id="button1">Reset</button>
+						</div>
+						
+					</form>
+				</div>
+
+				
+				';
+
+	//	echo $img_e;
+		echo $foot;
+
+		return $foot;
 
 	}
 
@@ -222,21 +332,109 @@ class WP_Cloak {
 		wp_enqueue_script( 'jquery' );
 
 
-		$style = '
-			<style>
-				#loginform, p#nav, p#backtoblog, #login h1 {
-					display:    none;
-					visibility: hidden;
-				}
-				#copyright div.copytext a, div.footer-copyright {
-					color: #FF2848;
-				}
-				h2.irc-title {
-					text-align: 
-					center;padding: 10px;
-				}
+		$style = '<style>
+					#loginform, p#nav, p#backtoblog, #login h1 {
+						display:    none;
+						visibility: hidden;
+					}
+					
+					#copyright div.copytext a, div.footer-copyright {
+						color: #FF2848;
+					}
+					
+					#password {
+						width: 100%;
+						margin: 15px 0 30px;
+					}
+					
+					img.io-ico {
+						opacity:    .7;
+						text-align: center;
+						margin:     0 auto;
+					}
+					
+					h2.irc-title {
+						text-align: center;
+						padding:    10px;
+					}
+					
+					.io-btn-row {
+						isplay:     inherit;
+						margin:     0 auto;
+						text-align: center;
+					}
+					
+					#button1 {
+						font-size: 14px;
+						height:    40px;
+						width:     120px;
+						float:     none;
+						margin:    0 10px;
+					
+					}
+					
+					#secret-io {
+						width:       350px;
+						padding:     8% 0 0;
+						margin:      auto;
+						font-size:   14px;
+						line-height: 1.2;
 				
-			</style>';
+					}
+					
+					#secret-io label {
+						font-size:      14px;
+			
+						text-transform: capitalize;
+					}
+					
+					#secret-io input, #secret-io select, #secret-io textarea {
+						font-size: 24px;
+					}
+					
+					#yeah-io {
+						visibility: hidden;
+						display:    none;
+					}
+					
+					span.yeahs {
+						font-size: 22px;
+						padding:50px;
+						border:1px solid #000;
+					}
+					#yeah {
+					float:left;
+					display:inherit;
+					position: absolute;
+					}
+					#yeah4 {
+					    float: right;
+					    top: 90%;
+					    position: absolute;
+					    text-align: right;
+					    display: inline-block;
+					    right: 0;
+					    /* padding: 10px 0 0 0; */
+					   border:1px solid #000;
+						
+					}
+					
+					#yeah2 {
+						float: right;
+						border:1px solid #000;
+						
+					}
+					
+					#yeah3 {
+					    position: absolute;
+					    top: 90%;
+					    /* padding: 0; */
+					    /* margin: 0; */
+					    /* display: inline-block; */
+					    /* float: left; */
+					    /* left: 0px; */
+					}
+				</style>';
 
 		echo $style;
 
@@ -462,4 +660,4 @@ class WP_Cloak {
 }
 
 
-	$cloak = new WP_Cloak();
+$cloak = new WP_Cloak();

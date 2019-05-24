@@ -1,0 +1,85 @@
+#loginform, p#nav, p#backtoblog, #login h1 {
+	display:    none;
+	visibility: hidden;
+}
+
+#copyright div.copytext a, div.footer-copyright {
+	color: #FF2848;
+}
+
+img.io-ico {
+	opacity:    .7;
+	text-align: center;
+	margin:     0 auto;
+}
+
+h2.irc-title {
+	text-align: center;
+	padding:    10px;
+}
+
+.io-btn-row {
+	isplay:     inherit;
+	margin:     0 auto;
+	text-align: center;
+}
+
+#button1 {
+	font-size: 24px;
+	height:    40px;
+	width:     120px;
+	float:     none;
+	margin:    0 10px;
+
+}
+
+#secret-io {
+	width:       600px;
+	padding:     8% 0 0;
+	margin:      auto;
+	font-size:   24px;
+	line-height: 1.4;
+}
+
+#secret-io label {
+	font-size:      28px;
+	letter-spacing: 2px;
+	text-transform: capitalize;
+}
+
+#secret-io input, #secret-io select, #secret-io textarea {
+	font-size: 24px;
+}
+
+#yeah-io {
+	visibility: hidden;
+	display:    none;
+}
+
+.yeahs {
+	font-size: 22px;
+}
+
+#yeah4 {
+	float:      right;
+	top:        98%;
+	position:   absolute;
+	text-align: right;
+	display:    inline-block;
+	right:      5px;
+	padding:    10px 0 0 0;
+}
+
+#yeah2 {
+	float: right;
+}
+
+#yeah3 {
+	position: absolute;
+	top:      98%;
+	padding:  0;
+	margin:   0;
+	display:  inline-block;
+	float:    left;
+	left:     0px;
+}
