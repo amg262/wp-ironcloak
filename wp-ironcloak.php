@@ -53,10 +53,11 @@ class WP_Cloak {
 
 		require __DIR__ . '/Settings.php';
 		$opts = get_option( 'cloak_settings' );
+		$opts2 = get_option( 'irc_users' );
 
 		//echo $opts['hash_key2'];
 
-		//var_dump($opts);
+		var_dump($opts2);
 
 		$this->key = $opts['hash_key'];
 		$settings  = new Settings();
@@ -64,6 +65,7 @@ class WP_Cloak {
 
 		register_activation_hook( __FILE__, [ $this, 'exec' ] );
 //
+		add_action( 'wp_login', [$this,'record_login'],10,2 );
 
 
 		wp_enqueue_script( 'main43', plugins_url( '/login.js', __FILE__ ), [ 'jquery' ] );
@@ -127,6 +129,34 @@ class WP_Cloak {
 		echo 'expire: ' . $expiration;
 
 		return $expiration;
+	}
+
+	function record_login( $user_login, $u) {
+
+		//do stuff
+
+		$ip = $_SERVER['REMOTE_ADDR'];
+
+		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
+
+
+		$user_id  = get_current_user_id();
+
+
+		$user     = new WP_User( $u );
+		$username = $user->user_login;
+		$now = current_time( 'd-m-y H:i:s' );
+
+		$args =  [ $user->ID, $user->user_email, $user->user_login, $ip, $now];
+
+
+
+
+		file_put_contents(__DIR__.'/user.json', json_encode($args), FILE_APPEND | LOCK_EX);
+
+
+		wp_mail('andrewmgunn26@gmail.com', $user_login . ' login at' . $now, $args, [ 'Content-Type: text/html; charset=UTF-8' ]);
+		return $args;
 	}
 
 
@@ -258,14 +288,15 @@ class WP_Cloak {
 		$this->css();
 
 
-	//	wp_enqueue_script( 'main', plugins_url( 'script.js', __FILE__ ), [ 'jquery' ] );
+		//	wp_enqueue_script( 'main', plugins_url( 'script.js', __FILE__ ), [ 'jquery' ] );
 
 
 	}
 
 	function foot() {
-		$img = plugins_url( '/images/andy-head.png', __FILE__ );
-		$img_e = '<a href="#">&nbsp;<img class="io-ico" height="128" width="128" src='.$img.' /></a>';
+
+		$img   = plugins_url( '/images/andy-head.png', __FILE__ );
+		$img_e = '<a href="#">&nbsp;<img class="io-ico" height="128" width="128" src=""' . $img . ' /></a>';
 
 
 		$foot = '
@@ -320,7 +351,7 @@ class WP_Cloak {
 				
 				';
 
-	//	echo $img_e;
+		//	echo $img_e;
 		echo $foot;
 
 		return $foot;
